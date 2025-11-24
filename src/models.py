@@ -29,11 +29,11 @@ def build_model_pipelines(preprocessor_scaled, preprocessor_unscaled, scale_pos_
 
     # Logistic Regression (use scaled preprocessor)
     log_reg = Pipeline(
-        steps=[("preprocess", preprocessor_scaled), ("clf", LogisticRegression(solver="saga", max_iter=2000))]
+        steps=[("preprocess", preprocessor_scaled), ("clf", LogisticRegression(max_iter=2000))]
     )
     log_reg_param_grid = {
-        "clf__C": np.logspace(-2, 1, 5) ,
-        "clf__penalty": ["l2", "l1"],
+        "clf__C": [0.1, 1.0, 10.0],
+        "clf__penalty": ["l2"],
         "clf__class_weight": [None, "balanced"],
     }
     models["log_reg"] = GridSearchCV(

@@ -3,10 +3,12 @@ from pathlib import Path
 from typing import List
 
 import joblib
+from tqdm import tqdm
 
 from preprocess import load_data, get_feature_target_split, build_preprocessor, train_test_split_data
 from models import build_model_pipelines
 from evaluate import evaluate_model, save_metrics
+from sklearn.model_selection import ParameterGrid
 
 
 BASE_DIR = Path(__file__).resolve().parents[1]
@@ -49,8 +51,20 @@ def main() -> None:
     metrics_list: List[dict] = []
 
     # Train and evaluate each model
-    for name, search in model_searches.items():
-        print(f"Training {name}...")
+    for name, search in tqdm(list(model_searches.items()), desc="Models"):
+        # estimate number of grid candidates and total fits (candidates * cv)
+        try:
+            param_grid = search.param_grid
+            n_candidates = sum(1 for _ in ParameterGrid(param_grid))
+        except Exception:
+            n_candidates = None
+
+        cv = getattr(search, 'cv', None)
+        if n_candidates is not None and cv is not None:
+            print(f"Training {name}: {n_candidates} candidates x {cv} folds = {n_candidates * cv} fits")
+        else:
+            print(f"Training {name}...")
+
         search.fit(X_train, y_train)
         best_model = search.best_estimator_
         print(f"Best params for {name}: {search.best_params_}")
