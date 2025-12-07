@@ -73,6 +73,14 @@ def evaluate_model(name: str, model, X_test, y_test, save_fig: bool = False, fig
 
 
 def save_metrics(metrics_list, path: str) -> None:
-    """Save list of metric dicts to a CSV file."""
-    df = pd.DataFrame(metrics_list)
-    df.to_csv(path, index=False)
+    """Append list of metric dicts to a CSV file."""
+    import os
+    df_new = pd.DataFrame(metrics_list)
+    
+    # If file exists, append; otherwise create new
+    if os.path.exists(path):
+        df_existing = pd.read_csv(path)
+        df_combined = pd.concat([df_existing, df_new], ignore_index=True)
+        df_combined.to_csv(path, index=False)
+    else:
+        df_new.to_csv(path, index=False)

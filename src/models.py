@@ -40,7 +40,7 @@ def build_model_pipelines(preprocessor_scaled, preprocessor_unscaled, scale_pos_
         log_reg,
         param_grid=log_reg_param_grid,
         cv=5,
-        scoring="roc_auc",
+        scoring="f1",
         n_jobs=1,
     )
 
@@ -58,7 +58,7 @@ def build_model_pipelines(preprocessor_scaled, preprocessor_unscaled, scale_pos_
         rf,
         param_grid=rf_param_grid,
         cv=5,
-        scoring="roc_auc",
+        scoring="f1",
         n_jobs=1,
     )
 
@@ -76,7 +76,7 @@ def build_model_pipelines(preprocessor_scaled, preprocessor_unscaled, scale_pos_
         gb,
         param_grid=gb_param_grid,
         cv=3,
-        scoring="roc_auc",
+        scoring="f1",
         n_jobs=1,
     )
 
@@ -111,7 +111,7 @@ def build_model_pipelines(preprocessor_scaled, preprocessor_unscaled, scale_pos_
             xgb,
             param_grid=xgb_param_grid,
             cv=5,
-            scoring="roc_auc",
+            scoring="f1",
             n_jobs=1,
         )
 
@@ -142,7 +142,7 @@ def build_model_pipelines(preprocessor_scaled, preprocessor_unscaled, scale_pos_
             lgbm,
             param_grid=lgbm_param_grid,
             cv=3,
-            scoring="roc_auc",
+            scoring="f1",
             n_jobs=1,
         )
 

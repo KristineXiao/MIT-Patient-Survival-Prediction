@@ -17,7 +17,7 @@ import joblib
 import numpy as np
 
 from sklearn.model_selection import ParameterGrid, StratifiedKFold
-from sklearn.metrics import roc_auc_score
+from sklearn.metrics import roc_auc_score, f1_score
 from sklearn.base import clone
 
 from preprocess import load_data, get_feature_target_split, build_preprocessor, train_test_split_data
@@ -51,7 +51,7 @@ class ManualGridSearch:
     - Supports estimator pipelines
     """
 
-    def __init__(self, estimator, param_grid, scoring="roc_auc", cv=3, n_jobs=1, refit=True):
+    def __init__(self, estimator, param_grid, scoring="f1", cv=3, n_jobs=1, refit=True):
         self.estimator = estimator
         self.param_grid = list(ParameterGrid(param_grid))
         self.scoring = scoring
@@ -90,13 +90,21 @@ class ManualGridSearch:
                 # Fit
                 model.fit(X_tr, y_tr)
 
-                # Predict probabilities
-                if hasattr(model, "predict_proba"):
-                    y_pred = model.predict_proba(X_val)[:, 1]
-                else:
+                # Calculate score based on scoring metric
+                if self.scoring == "roc_auc":
+                    if hasattr(model, "predict_proba"):
+                        y_pred = model.predict_proba(X_val)[:, 1]
+                    else:
+                        y_pred = model.predict(X_val)
+                    score = roc_auc_score(y_val, y_pred)
+                elif self.scoring == "f1":
                     y_pred = model.predict(X_val)
-
-                score = roc_auc_score(y_val, y_pred)
+                    score = f1_score(y_val, y_pred)
+                else:
+                    # Default to f1
+                    y_pred = model.predict(X_val)
+                    score = f1_score(y_val, y_pred)
+                    
                 fold_scores.append(score)
 
                 # Update progress bar
@@ -183,7 +191,7 @@ def main(model_name: str) -> None:
     print(f"\nBest parameters for {model_name}:")
     for param, value in search.best_params_.items():
         print(f"  {param}: {value}")
-    print(f"Best CV score (ROC-AUC): {search.best_score_:.4f}")
+    print(f"Best CV score ({search.scoring.upper()}): {search.best_score_:.4f}")
 
     best_model = search.best_estimator_
 
